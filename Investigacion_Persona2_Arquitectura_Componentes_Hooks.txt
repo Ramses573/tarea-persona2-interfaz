@@ -1,0 +1,369 @@
+================================================================================
+SECCIÓN 2: ARQUITECTURA, COMPONENTES Y HOOKS EN REACT NATIVE
+Responsable: Persona 2 (Investigación técnica y construcción de interfaz)
+================================================================================
+
+2.1. ARQUITECTURA BÁSICA DE UNA APLICACIÓN REACT NATIVE
+--------------------------------------------------------------------------------
+React Native es un framework de desarrollo móvil multiplataforma creado por Meta
+Platforms que permite construir aplicaciones nativas reales para Android e iOS
+utilizando JavaScript (o TypeScript) y la biblioteca React. A diferencia de los
+enfoques híbridos basados en WebViews (como Apache Cordova o Ionic en sus
+primeras versiones), React Native traduce la jerarquía de componentes declarados
+en React directamente en vistas nativas propias del sistema operativo anfitrión
+(Meta Platforms, 2025a).
+
+2.1.1. Hilos principales de ejecución (Threads)
+El entorno de ejecución de una aplicación React Native opera sobre tres hilos
+principales que trabajan de forma coordinada:
+
+1. Hilo de JavaScript (JS Thread): Es el hilo donde el motor de JavaScript
+   (actualmente Hermes por defecto) ejecuta la lógica de negocio de la
+   aplicación, procesa el árbol virtual de React, gestiona los estados (Hooks)
+   y despacha las solicitudes de red.
+2. Hilo Principal o Nativo (Main / UI Thread): Es el hilo nativo del sistema
+   operativo (Android o iOS) encargado de dibujar la interfaz gráfica en la
+   pantalla y capturar los eventos táctiles e interacciones del usuario.
+3. Hilo de Sombra (Shadow Thread): Es un hilo en segundo plano que utiliza el
+   motor de diseño multiplataforma Yoga (desarrollado en C++) para calcular las
+   posiciones y dimensiones de los elementos definidos con Flexbox antes de
+   enviar las coordenadas exactas al hilo de interfaz nativa.
+
+2.1.2. Evolución arquitectónica: Del Bridge a la Nueva Arquitectura (JSI)
+Históricamente, React Native funcionó bajo la arquitectura del "Puente"
+(Bridge), en la cual el hilo de JavaScript y el hilo Nativo estaban totalmente
+desacoplados y se comunicaban mediante mensajes asíncronos serializados en
+formato JSON. Aunque este modelo permitió gran portabilidad, el costo de
+serializar y deserializar grandes volúmenes de datos (por ejemplo, al desplazar
+listas extensas a 60 cuadros por segundo) podía ocasionar cuellos de botella.
+
+Para superar estas limitaciones, las versiones modernas de React Native
+implementan la Nueva Arquitectura, compuesta por cuatro pilares fundamentales
+(Meta Platforms, 2025b):
+
+- JSI (JavaScript Interface): Capa escrita en C++ que reemplaza al Bridge.
+  Permite que el motor de JavaScript mantenga referencias directas en memoria a
+  objetos nativos C++ e invoque métodos de manera síncrona y asíncrona sin
+  serialización JSON.
+- Fabric: Nuevo sistema de renderizado de interfaz de usuario que unifica la
+  lógica en C++ entre plataformas y permite priorizar interacciones urgentes del
+  usuario mediante las capacidades concurrentes de React 18+.
+- TurboModules: Evolución de los módulos nativos (cámara, sensores,
+  almacenamiento) que se cargan de forma perezosa (lazy loading) únicamente
+  cuando la aplicación los necesita, reduciendo el tiempo de arranque.
+- Codegen: Herramienta que genera automáticamente interfaces estáticas en C++,
+  Java/Kotlin y Objective-C a partir de definiciones tipadas en JavaScript,
+  garantizando seguridad de tipos entre capas.
+
+
+2.2. ESTRUCTURA Y ORGANIZACIÓN DE COMPONENTES
+--------------------------------------------------------------------------------
+En React Native, toda la interfaz de usuario se construye mediante componentes.
+Un componente es una unidad de código independiente, reutilizable y declarativa
+que recibe datos de entrada (denominados props), administra opcionalmente un
+estado interno y retorna una descripción visual escrita en JSX (JavaScript XML).
+
+2.2.1. Jerarquía y flujo unidireccional de datos
+La interfaz se organiza como un árbol jerárquico de componentes:
+- Componente Raíz (App): Punto de entrada que inicializa la configuración global
+  y monta la pantalla activa.
+- Componentes de Pantalla o Contenedores (Screens): Representan vistas completas
+  de la aplicación (por ejemplo, HomeScreen). Se encargan de coordinar el estado
+  general, invocar servicios de datos y distribuir la información.
+- Componentes Presentacionales o Reutilizables (Components): Piezas visuales
+  específicas (por ejemplo, ItemCard o CategoryFilter) que reciben datos y
+  funciones callback a través de props, manteniendo alta cohesión y bajo
+  acoplamiento.
+
+El flujo de datos en React Native es estrictamente unidireccional (top-down):
+los componentes padres transfieren datos hacia los componentes hijos mediante
+props inmutables, mientras que los hijos notifican eventos hacia el padre
+ejecutando funciones recibidas como propiedades.
+
+2.2.2. Organización modular del proyecto
+Para garantizar la mantenibilidad y el trabajo colaborativo en equipo, el código
+fuente de la interfaz se estructura bajo el directorio `src/` siguiendo una
+separación por responsabilidades:
+
+  proyecto-expo/
+  ├── App.js                        # Punto de entrada principal
+  └── src/
+      ├── components/               # Componentes visuales reutilizables
+      │   ├── ItemCard.js           # Tarjeta individual para mostrar un registro
+      │   └── CategoryFilter.js     # Barra horizontal de filtros
+      ├── screens/                  # Pantallas principales de la aplicación
+      │   └── HomeScreen.js         # Interfaz principal con listado FlatList
+      ├── data/                     # Datos de prueba (Mock Data) y adaptadores
+      │   └── mockData.js           # Arreglo de objetos de prueba y normalizador
+      ├── services/                 # Consumo de APIs REST (Persona 3)
+      └── styles/                   # Paleta de colores y estilos compartidos
+          └── theme.js              # Constantes de diseño y StyleSheet global
+
+
+2.3. COMPONENTES PRINCIPALES DE REACT NATIVE
+--------------------------------------------------------------------------------
+React Native provee un conjunto de componentes nucleares (Core Components) que
+se compilan hacia controles nativos equivalentes en cada plataforma (Meta
+Platforms, 2025a). A continuación, se detallan los seis componentes esenciales
+utilizados en la construcción de la interfaz:
+
+1. View
+   Es el bloque de construcción más elemental para estructurar contenedores. Se
+   traduce directamente en un `android.view.View` en Android y en un `UIView` en
+   iOS. Soporta diseño mediante Flexbox (con `flexDirection: 'column'` por
+   defecto), estilos de bordes, sombras y manejo de accesibilidad.
+
+2. Text
+   Es el único componente autorizado en React Native para mostrar cadenas de
+   caracteres en pantalla (equivalente a `TextView` en Android y `UITextView` en
+   iOS). En React Native, colocar texto suelto dentro de un `<View>` sin
+   envolverlo en `<Text>` produce un error en tiempo de ejecución. Admite
+   propiedades clave como `numberOfLines` para truncar textos largos y soporta
+   anidamiento para heredar estilos tipográficos.
+
+3. Image
+   Permite renderizar imágenes estáticas empaquetadas en el proyecto mediante
+   `require('./ruta/imagen.png')` o imágenes remotas alojadas en servidores web
+   mediante la propiedad `source={{ uri: 'https://...' }}`. Para imágenes
+   remotas es obligatorio definir explícitamente su ancho (`width`) y alto
+   (`height`) en los estilos, ya que React Native no conoce sus dimensiones
+   antes de descargarlas. Su propiedad `resizeMode` (`cover`, `contain`,
+   `stretch`) controla cómo se adapta la imagen a su contenedor.
+
+4. ScrollView
+   Es un contenedor genérico con capacidad de desplazamiento vertical u
+   horizontal (`horizontal={true}`). Su característica técnica principal es que
+   renderiza en memoria TODOS sus componentes hijos de forma simultánea en el
+   momento en que se monta. Por ello, es ideal para formularios, pantallas de
+   detalle o barras de categorías con pocos elementos, pero no debe emplearse
+   para listas extensas o dinámicas provenientes de una API.
+
+5. FlatList
+   Es el componente especializado para renderizar listas de datos de forma
+   eficiente mediante virtualización (lazy rendering). A diferencia de
+   `ScrollView`, `FlatList` solo instancia en memoria los elementos que son
+   visibles en la ventana actual del dispositivo más un pequeño margen,
+   reciclando o desmontando los elementos que salen de la pantalla. Sus
+   propiedades fundamentales son:
+   - `data`: Arreglo de objetos que alimenta la lista.
+   - `renderItem`: Función que recibe cada elemento (`{ item, index }`) y
+     retorna el componente visual que lo representa (por ejemplo, `<ItemCard />`).
+   - `keyExtractor`: Función que devuelve un identificador único en formato
+     cadena (`string`) por cada elemento para optimizar la reconciliación.
+   - `ListHeaderComponent` y `ListEmptyComponent`: Componentes para renderizar
+     el encabezado de la lista y el estado vacío cuando no hay registros.
+
+   Comparativa técnica entre ScrollView y FlatList:
+   +------------------------+-------------------------------+-------------------------------+
+   | Criterio               | ScrollView                    | FlatList                      |
+   +------------------------+-------------------------------+-------------------------------+
+   | Estrategia de          | Renderiza todos los hijos al  | Virtualización: solo          |
+   | renderizado            | mismo tiempo en memoria.      | renderiza los ítems visibles. |
+   +------------------------+-------------------------------+-------------------------------+
+   | Consumo de memoria RAM | Crece linealmente con la      | Se mantiene constante y       |
+   |                        | cantidad de elementos.        | controlado.                   |
+   +------------------------+-------------------------------+-------------------------------+
+   | Caso de uso ideal      | Vistas estáticas, formularios | Listados dinámicos y datos    |
+   |                        | o barras de pocos botones.    | obtenidos de APIs REST.       |
+   +------------------------+-------------------------------+-------------------------------+
+
+6. StyleSheet
+   Es una API propia de React Native (`StyleSheet.create({})`) similar a las
+   hojas de estilo CSS, pero expresada mediante objetos de JavaScript con
+   sintaxis `camelCase` (por ejemplo, `backgroundColor`, `borderRadius`,
+   `paddingHorizontal`). En React Native las dimensiones son adimensionales y
+   representan píxeles independientes de la densidad (dp en Android, pt en iOS),
+   lo que garantiza proporciones consistentes en pantallas de distinta
+   resolución.
+
+Ejemplo integrador de los componentes principales:
+
+```jsx
+import React from 'react';
+import { View, Text, Image, FlatList, ScrollView, StyleSheet } from 'react-native';
+
+const DATOS = [
+  { id: '1', titulo: 'React Native', imagen: 'https://picsum.photos/200' },
+  { id: '2', titulo: 'Expo SDK', imagen: 'https://picsum.photos/201' },
+];
+
+export default function EjemploComponentes() {
+  return (
+    <View style={styles.contenedor}>
+      {/* ScrollView para filtros horizontales cortos */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <Text style={styles.etiqueta}>Todos</Text>
+        <Text style={styles.etiqueta}>Destacados</Text>
+      </ScrollView>
+
+      {/* FlatList para el listado principal optimizado */}
+      <FlatList
+        data={DATOS}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={styles.tarjeta}>
+            <Image source={{ uri: item.imagen }} style={styles.imagen} />
+            <Text style={styles.titulo}>{item.titulo}</Text>
+          </View>
+        )}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  contenedor: { flex: 1, padding: 16, backgroundColor: '#F8FAFC' },
+  etiqueta: { marginRight: 10, padding: 8, backgroundColor: '#DBEAFE', borderRadius: 8 },
+  tarjeta: { flexDirection: 'row', alignItems: 'center', marginVertical: 8, padding: 12, backgroundColor: '#FFF', borderRadius: 10 },
+  imagen: { width: 50, height: 50, borderRadius: 25, marginRight: 12 },
+  titulo: { fontSize: 16, fontWeight: 'bold', color: '#0F172A' },
+});
+```
+
+
+2.4. FUNCIONAMIENTO DE LOS HOOKS useState Y useEffect
+--------------------------------------------------------------------------------
+Introducidos en React 16.8, los Hooks son funciones especiales que permiten a
+los componentes funcionales conectarse al sistema de estado reactivo y a las
+fases del ciclo de vida de React sin necesidad de escribir clases (Meta
+Platforms, 2025c). Para su correcto funcionamiento deben cumplirse dos reglas
+estrictas: invocarse únicamente en el nivel superior del componente (nunca
+dentro de condicionales o ciclos) e invocarse exclusivamente desde componentes
+funcionales o Hooks personalizados.
+
+2.4.1. El Hook useState (Gestión del estado local)
+`useState` permite declarar variables de estado cuyo cambio provoca que React
+Native vuelva a renderizar automáticamente el componente para reflejar los
+nuevos datos en la interfaz.
+
+Sintaxis:
+  const [estado, setEstado] = useState(valorInicial);
+
+- `estado`: Valor actual almacenado durante el renderizado en curso.
+- `setEstado`: Función actualizadora que programa un nuevo renderizado con el
+  nuevo valor.
+- `valorInicial`: Valor con el que nace el estado en el primer montaje (puede
+  ser un booleano, número, cadena, objeto o arreglo como `[]`).
+
+Ejemplo práctico de `useState` (Contador de favoritos y filtro activo):
+
+```jsx
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+
+export default function ContadorFavoritos() {
+  // Declaración de estados locales
+  const [favoritos, setFavoritos] = useState(0);
+  const [activo, setActivo] = useState(false);
+
+  const alternarFavorito = () => {
+    setActivo((estadoPrevio) => !estadoPrevio);
+    setFavoritos((conteoPrevio) => (activo ? conteoPrevio - 1 : conteoPrevio + 1));
+  };
+
+  return (
+    <View style={styles.caja}>
+      <Text style={styles.texto}>Elementos guardados: {favoritos}</Text>
+      <TouchableOpacity style={styles.boton} onPress={alternarFavorito}>
+        <Text style={styles.textoBoton}>
+          {activo ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  caja: { padding: 16, alignItems: 'center' },
+  texto: { fontSize: 16, marginBottom: 8 },
+  boton: { backgroundColor: '#2563EB', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8 },
+  textoBoton: { color: '#FFFFFF', fontWeight: '600' },
+});
+```
+
+2.4.2. El Hook useEffect (Manejo del ciclo de vida y efectos secundarios)
+`useEffect` permite sincronizar un componente con sistemas externos o ejecutar
+efectos secundarios después de que React ha actualizado la interfaz (por
+ejemplo, cargar datos iniciales, realizar peticiones HTTP a una API REST,
+configurar temporizadores o suscribirse a eventos del dispositivo).
+
+Sintaxis:
+  useEffect(() => {
+    // 1. Código del efecto secundario (al montar o actualizar)
+    return () => {
+      // 2. Función opcional de limpieza (al desmontar o antes de re-ejecutar)
+    };
+  }, [dependencias]);
+
+El comportamiento de `useEffect` está determinado por su segundo argumento
+(el arreglo de dependencias):
+1. Arreglo vacío `[]`: El efecto se ejecuta una única vez cuando el componente
+   se monta en pantalla (equivalente a `componentDidMount`). Es el patrón
+   estándar para disparar la carga inicial de datos de prueba o de una API REST.
+2. Arreglo con variables `[categoriaSeleccionada]`: El efecto se ejecuta en el
+   montaje inicial y vuelve a ejecutarse únicamente cuando alguna de las
+   variables listadas cambia su valor entre renderizados.
+3. Sin arreglo de dependencias: El efecto se ejecuta tras cada renderizado del
+   componente (debe evitarse si modifica el estado interno, ya que provocaría
+   un bucle infinito).
+
+Ejemplo práctico combinando `useState` y `useEffect` (Carga asíncrona de datos):
+
+```jsx
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, ActivityIndicator } from 'react-native';
+
+const DATOS_PRUEBA = [
+  { id: '1', nombre: 'Elemento Alfa' },
+  { id: '2', nombre: 'Elemento Beta' },
+];
+
+export default function ListaConCicloDeVida() {
+  const [datos, setDatos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    // Simulación de carga inicial al montar el componente
+    const temporizador = setTimeout(() => {
+      setDatos(DATOS_PRUEBA);
+      setCargando(false);
+    }, 600);
+
+    // Limpieza del temporizador si el componente se desmonta antes de terminar
+    return () => clearTimeout(temporizador);
+  }, []); // [] asegura que solo se ejecute una vez al montar
+
+  if (cargando) {
+    return <ActivityIndicator size="large" color="#2563EB" />;
+  }
+
+  return (
+    <View style={{ flex: 1, padding: 16 }}>
+      <FlatList
+        data={datos}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <Text>{item.nombre}</Text>}
+      />
+    </View>
+  );
+}
+```
+
+
+2.5. REFERENCIAS BIBLIOGRÁFICAS (FORMATO APA 7.ª EDICIÓN)
+--------------------------------------------------------------------------------
+- Boduch, A., & Derks, R. (2020). React and React Native: A complete hands-on
+  guide to modern web and mobile development with React.js (3rd ed.). Packt
+  Publishing.
+- Eisenman, B. (2017). Learning React Native: Building native mobile apps with
+  JavaScript (2nd ed.). O'Reilly Media.
+- Expo. (2025). Expo Documentation: Develop, review, and deploy universal
+  native apps. https://docs.expo.dev/
+- Meta Platforms. (2025a). React Native Documentation: Core Components and APIs.
+  https://reactnative.dev/docs/components-and-apis
+- Meta Platforms. (2025b). React Native Documentation: About the New
+  Architecture (Fabric, TurboModules, JSI, and Codegen).
+  https://reactnative.dev/architecture/landing-page
+- Meta Platforms. (2025c). React Documentation: Built-in React Hooks (useState,
+  useEffect). https://react.dev/reference/react/hooks
+================================================================================
