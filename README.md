@@ -14,10 +14,10 @@ El repositorio contiene la aplicación integrada, las pruebas, las evidencias y 
 
 Requisitos: Node.js 20.19.4 o superior, npm y conexión a Internet para consultar la API y cargar las imágenes.
 
-Para clonar esta rama, instalar las dependencias e iniciar Expo:
+Para clonar la rama principal, instalar las dependencias e iniciar Expo:
 
 ```sh
-git clone --branch fabian --single-branch https://github.com/Ramses573/tarea-persona2-interfaz.git
+git clone --branch main --single-branch https://github.com/Ramses573/tarea-persona2-interfaz.git
 cd tarea-persona2-interfaz/persona2-interfaz
 npm ci
 npm start
