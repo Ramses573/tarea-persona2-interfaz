@@ -25,35 +25,53 @@ import { COLORS, SPACING, globalStyles } from '../../../shared/styles/theme';
  * - Preparada para recibir datos desde la API REST de la Persona 3 mediante props
  *   desde un contenedor externo, sin agregar llamadas HTTP a esta pantalla.
  */
-export default function HomeScreen({
-  apiData = null,
-  apiLoading = false,
-  apiError = null,
-}) {
+export default function HomeScreen(props = {}) {
+  const { apiData = null, apiLoading = false, apiError = null } = props;
+  const hasApiProps =
+    Object.prototype.hasOwnProperty.call(props, 'apiData') ||
+    Object.prototype.hasOwnProperty.call(props, 'apiLoading') ||
+    Object.prototype.hasOwnProperty.call(props, 'apiError');
+
   // 1. Estados locales con useState
   const [items, setItems] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [favorites, setFavorites] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isMockLoading, setIsMockLoading] = useState(true);
+  const isLoading = hasApiProps ? apiLoading : isMockLoading;
 
   // 2. Efecto con useEffect para cargar datos de prueba o sincronizar datos de la API (Persona 3)
   useEffect(() => {
-    if (apiData && Array.isArray(apiData)) {
-      const normalized = apiData.map((item, idx) => normalizeItem(item, idx));
-      setItems(normalized);
-      setIsLoading(apiLoading);
+    if (hasApiProps) {
+      // Mientras la API carga, apiLoading controla la vista y no se muestra una lista vacía.
+      if (apiLoading) {
+        return;
+      }
+
+      // Un error no debe mostrarse como una respuesta exitosa sin registros.
+      if (apiError) {
+        setItems([]);
+        return;
+      }
+
+      if (Array.isArray(apiData)) {
+        const normalized = apiData.map((item, idx) => normalizeItem(item, idx));
+        setItems(normalized);
+      } else {
+        setItems([]);
+      }
+
       return;
     }
 
     // Simulación de carga inicial con datos de prueba (Entregable Persona 2)
     const timer = setTimeout(() => {
       setItems(MOCK_ITEMS);
-      setIsLoading(false);
+      setIsMockLoading(false);
     }, 500);
 
     // Función de limpieza del efecto
     return () => clearTimeout(timer);
-  }, [apiData, apiLoading]);
+  }, [hasApiProps, apiData, apiLoading, apiError]);
 
   // Alternar elementos marcados como favoritos
   const handleToggleFavorite = (id) => {
@@ -65,8 +83,9 @@ export default function HomeScreen({
   };
 
   // Filtrado de datos según la categoría seleccionada
-  const filteredItems =
-    selectedCategory === 'Todos'
+  const filteredItems = apiError
+    ? []
+    : selectedCategory === 'Todos'
       ? items
       : items.filter(
           (item) =>
@@ -77,7 +96,7 @@ export default function HomeScreen({
   const renderHeader = () => (
     <View>
       <View style={styles.headerContainer}>
-        <View>
+        <View style={styles.headerCopy}>
           <Text style={styles.headerSubtitle}>PROYECTO REACT NATIVE</Text>
           <Text style={styles.headerTitle}>Catálogo de Elementos</Text>
         </View>
@@ -135,7 +154,7 @@ export default function HomeScreen({
               />
             )}
             ListHeaderComponent={renderHeader}
-            ListEmptyComponent={renderEmptyList}
+            ListEmptyComponent={apiError ? null : renderEmptyList}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
@@ -149,11 +168,18 @@ export default function HomeScreen({
 const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.lg,
     paddingBottom: SPACING.md,
+  },
+  headerCopy: {
+    flexBasis: 240,
+    flexGrow: 1,
+    flexShrink: 1,
   },
   headerSubtitle: {
     fontSize: 11,

@@ -5,20 +5,20 @@ Proyecto grupal de Programación V, Tarea Corta 3. Aplicación React Native con 
 ## Archivos de entrega
 
 - [Investigación grupal](docs/entrega/InvestigacionReactNative.pdf).
-- [Paquete del proyecto, documentación, pruebas y evidencias](docs/entrega/Entrega_React_Native.zip).
+- [Pruebas de integración y validación](docs/desarrollo/Pruebas_Integracion.md).
+- [Capturas y resultados](docs/desarrollo/evidencias/persona4/).
 
-La versión integrada y validada está en el ZIP de entrega. Las instrucciones siguientes corresponden a ese paquete.
+El repositorio contiene la aplicación integrada, las pruebas, las evidencias y el PDF de la investigación.
 
 ## Instalación y ejecución
 
 Requisitos: Node.js 20.19.4 o superior, npm y conexión a Internet para consultar la API y cargar las imágenes.
 
-1. Descargar el ZIP desde el enlace anterior y descomprimirlo.
-2. Abrir una terminal en la carpeta `Entrega_React_Native`.
-3. Ejecutar:
+Para clonar esta rama, instalar las dependencias e iniciar Expo:
 
 ```sh
-cd persona2-interfaz
+git clone --branch fabian --single-branch https://github.com/Ramses573/tarea-persona2-interfaz.git
+cd tarea-persona2-interfaz/persona2-interfaz
 npm ci
 npm start
 ```
@@ -41,10 +41,10 @@ Para abrirla en un teléfono se necesita un entorno compatible con Expo SDK 54. 
 
 La carga, los errores y las respuestas vacías tienen presentaciones distintas.
 
-## Contenido del ZIP
+## Organización del repositorio
 
 ```text
-Entrega_React_Native/
+tarea-persona2-interfaz/
   README.md
   persona2-interfaz/
     App.js
@@ -61,11 +61,11 @@ Entrega_React_Native/
       InvestigacionReactNative.pdf
 ```
 
-El archivo `docs/desarrollo/Pruebas_Integracion.md` contiene la matriz de pruebas y los resultados. Las capturas y `resultados-web.json` están en `docs/desarrollo/evidencias/persona4/`, dentro del ZIP.
+El archivo [Pruebas_Integracion.md](docs/desarrollo/Pruebas_Integracion.md) contiene la matriz de pruebas y los resultados. Las capturas y `resultados-web.json` están en [la carpeta de evidencias](docs/desarrollo/evidencias/persona4/).
 
 ## Pruebas reproducibles
 
-Desde `Entrega_React_Native/persona2-interfaz`:
+Desde la carpeta `persona2-interfaz` del repositorio:
 
 ```sh
 npm test

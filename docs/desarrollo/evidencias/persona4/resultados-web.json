@@ -1,0 +1,151 @@
+{
+  "executedAt": "2026-11-05T20:00:53.938Z",
+  "node": "v24.19.0",
+  "viewport": "390 × 844 unless otherwise stated",
+  "results": [
+    {
+      "id": "01-carga",
+      "name": "Loading remains visible until the API responds",
+      "status": "PASS",
+      "detail": "No mock records and no empty-state message during loading.",
+      "errors": []
+    },
+    {
+      "id": "02-interacciones",
+      "name": "Cards, images, filters and favorite toggle",
+      "status": "PASS",
+      "detail": "2 records; favorite 0 → 1 → 0; filter 2 → 1 → 2; image loaded.",
+      "errors": []
+    },
+    {
+      "id": "03-vacia",
+      "name": "An empty response is displayed as an empty list",
+      "status": "PASS",
+      "detail": "HTTP 200 with [] shows the empty state.",
+      "errors": []
+    },
+    {
+      "id": "04-http",
+      "name": "HTTP failure is distinct from an empty response",
+      "status": "PASS",
+      "detail": "HTTP 500 shows the error banner without the empty-state message.",
+      "errors": []
+    },
+    {
+      "id": "05-red",
+      "name": "Network failure is reported",
+      "status": "PASS",
+      "detail": "The API request is intentionally aborted; the local app remains available.",
+      "errors": []
+    },
+    {
+      "id": "06-json",
+      "name": "An invalid response is reported",
+      "status": "PASS",
+      "detail": "Controlled response: not json",
+      "errors": []
+    },
+    {
+      "id": "07-estructura",
+      "name": "An invalid response is reported",
+      "status": "PASS",
+      "detail": "Controlled response: {\"articles\":[]}",
+      "errors": []
+    },
+    {
+      "id": "08-ancho-320",
+      "name": "Header content fits a 320 px viewport",
+      "status": "PASS",
+      "detail": "Counter fully visible at 320 × 844.",
+      "errors": []
+    },
+    {
+      "id": "09-api-real",
+      "name": "Real DEV.to API response renders in the browser",
+      "status": "PASS",
+      "detail": {
+        "status": 200,
+        "records": 30,
+        "firstTitle": "I built a markdown notes app where every note is a plain file, and search runs on the device",
+        "imageStatus": [
+          {
+            "loaded": true
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          },
+          {
+            "loaded": false
+          }
+        ]
+      },
+      "errors": []
+    }
+  ]
+}
