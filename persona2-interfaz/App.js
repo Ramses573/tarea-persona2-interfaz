@@ -1,5 +1,5 @@
 import React from 'react';
-import HomeScreen from './src/screens/HomeScreen';
+import HomeScreen from './src/features/catalog/screens/HomeScreen';
 
 /**
  * Punto de entrada de la aplicación - Persona 2
