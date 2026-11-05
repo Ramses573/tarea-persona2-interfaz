@@ -10,8 +10,9 @@ import {
 } from 'react-native';
 import ItemCard from '../components/ItemCard';
 import CategoryFilter from '../components/CategoryFilter';
-import { MOCK_ITEMS, CATEGORIES, normalizeItem } from '../data/mockData';
-import { COLORS, SPACING, globalStyles } from '../styles/theme';
+import { MOCK_ITEMS, CATEGORIES } from '../data/mockData';
+import { normalizeItem } from '../adapters/normalizeItem';
+import { COLORS, SPACING, globalStyles } from '../../../shared/styles/theme';
 
 /**
  * Pantalla Principal (HomeScreen) - Persona 2
@@ -22,7 +23,7 @@ import { COLORS, SPACING, globalStyles } from '../styles/theme';
  * - Componentes principales: View, Text, FlatList, ScrollView (en CategoryFilter),
  *   Image (en ItemCard) y StyleSheet.
  * - Preparada para recibir datos desde la API REST de la Persona 3 mediante props
- *   o integrando la llamada HTTP directamente en el bloque useEffect.
+ *   desde un contenedor externo, sin agregar llamadas HTTP a esta pantalla.
  */
 export default function HomeScreen({
   apiData = null,

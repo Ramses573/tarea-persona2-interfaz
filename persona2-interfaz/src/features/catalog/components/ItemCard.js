@@ -6,7 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import { COLORS, SPACING, globalStyles } from '../styles/theme';
+import { COLORS, SPACING, globalStyles } from '../../../shared/styles/theme';
 
 /**
  * Componente ItemCard - Persona 2

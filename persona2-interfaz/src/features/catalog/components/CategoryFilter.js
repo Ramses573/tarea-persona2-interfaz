@@ -6,7 +6,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { COLORS, SPACING } from '../styles/theme';
+import { COLORS, SPACING } from '../../../shared/styles/theme';
 
 /**
  * Componente CategoryFilter - Persona 2
