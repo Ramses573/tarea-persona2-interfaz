@@ -4,7 +4,7 @@ Proyecto grupal de Programación V, Tarea Corta 3. Aplicación React Native con 
 
 ## Archivos de entrega
 
-- [Investigación grupal con portada](docs/entrega/InvestigacionReactNative.pdf).
+- [Investigación grupal](docs/entrega/InvestigacionReactNative.pdf).
 - [Paquete del proyecto, documentación, pruebas y evidencias](docs/entrega/Entrega_React_Native.zip).
 
 La versión integrada y validada está en el ZIP de entrega. Las instrucciones siguientes corresponden a ese paquete.
